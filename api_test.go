@@ -176,7 +176,7 @@ func TestBuildQueryString(t *testing.T) {
 
 func TestGet(t *testing.T) {
 	c := testConnectionWrapper(t)
-	resp, err := c.Get("/cookbooks")
+	resp, err := c.Get("/cookbooks", nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -213,7 +213,7 @@ func TestGetWithParams(t *testing.T) {
 	params := make(map[string]string)
 	params["q"] = "name:neo4j*"
 
-	resp, err := c.GetWithParams("/search/node", params)
+	resp, err := c.Get("/search/node", params)
 	if err != nil {
 		t.Error(err)
 	}
