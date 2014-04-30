@@ -26,7 +26,7 @@ func init() {
 }
 
 func testConnectionWrapper(t *testing.T) *Chef {
-	chef, err := Connect()
+	chef, err := Connect("test/support/knife.rb")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -273,7 +273,7 @@ func TestPost(t *testing.T) {
 }
 
 func TestConnect(t *testing.T) {
-	if _, err := Connect(); err != nil {
+	if _, err := Connect("test/support/knife.rb"); err != nil {
 		t.Error(err)
 	}
 }
@@ -329,22 +329,6 @@ func TestBase64BlockEncode(t *testing.T) {
 	expected := []string{"YWJjZGVmZ2hpamtsbW5vcHFyc3R1dnd4eXphYmNkZWZnaGlqa2xtbm9wcXJz", "dHV2d3h5emFiY2RlZmdoaWprbG1ub3BxcnN0dXZ3eHl6"}
 	if !reflect.DeepEqual(results, expected) {
 		t.Error("Results not matching")
-	}
-}
-
-func TestKeyFromString(t *testing.T) {
-	config := testConfig()
-	_, err := keyFromString([]byte(config.KeyString))
-	if err != nil {
-		t.Error(err)
-	}
-}
-
-func TestKeyFromFile(t *testing.T) {
-	config := testConfig()
-	_, err := keyFromFile(config.KeyPath)
-	if err != nil {
-		t.Error(err)
 	}
 }
 
