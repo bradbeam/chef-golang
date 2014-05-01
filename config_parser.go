@@ -54,11 +54,13 @@ func ParseConfig(configfile ...string) (*KnifeConfig, error) {
 	scanner := bufio.NewScanner(file)
 	config := new(KnifeConfig)
 	for scanner.Scan() {
-		split := splitWhitespace(scanner.Text())
-		if len(split) == 2 {
-			switch split[0] {
-			case "chef_server_url":
-				config.ChefServerUrl = filterQuotes(split[1])
+		key := regexp.MustCompile(`\s`).Split(scanner.Text(), -1)
+		data := regexp.MustCompile(`^[a-z](.+?)\s+`).Split(scanner.Text(), -1)
+
+		if regexp.MustCompile(`^[a-z]+`).MatchString(key[0]) {
+			switch {
+			case checkLineKey("chef_server_url", key[0]):
+				config.ChefServerUrl = filterQuotes(data[1])
 				chefUrl, err := url.Parse(config.ChefServerUrl)
 				if err != nil {
 					return nil, err
@@ -81,37 +83,64 @@ func ParseConfig(configfile ...string) (*KnifeConfig, error) {
 				} else {
 					return nil, errors.New("Invalid host format")
 				}
-			case "client_key":
-				key, err := KeyFromFile(filterQuotes(split[1]))
+
+			case checkLineKey("chef_zero[:enabled]", key[0]):
+				config.ChefZeroEnabled, _ = strconv.ParseBool(filterQuotes(data[1]))
+			case checkLineKey("chef_zero[:port]", key[0]):
+				config.ChefZeroPort = filterQuotes(data[1])
+			case checkLineKey("client_key", key[0]):
+				key, err := KeyFromFile(filterQuotes(data[1]))
 				if err != nil {
 					return nil, err
 				}
 				config.ClientKey = key
-			case "cookbook_copyright":
-				config.CookbookCopyright = filterQuotes(split[1])
-			case "cookbook_email":
-				config.CookbookEmail = filterQuotes(split[1])
-			case "cookbook_license":
-				config.CookbookLicense = filterQuotes(split[1])
-			case "data_bag_encrypt_version":
-				config.DataBagEncryptVersion, _ = strconv.ParseInt(filterQuotes(split[1]), 0, 0)
-			case "local_mode":
-				config.LocalMode, _ = strconv.ParseBool(filterQuotes(split[1]))
-			case "node_name":
-				config.NodeName = filterQuotes(split[1])
-			case "syntax_check_cache_path":
-				config.SyntaxCheckCachePath = filterQuotes(split[1])
-			case "validation_client_name":
-				config.ValidationClientName = filterQuotes(split[1])
-			case "validation_key":
-				config.ValidationKey = filterQuotes(split[1])
-			case "versioned_cookbooks":
-				config.VersionedCookbooks, _ = strconv.ParseBool(filterQuotes(split[1]))
+			case checkLineKey("cookbook_copyright", key[0]):
+				config.CookbookCopyright = filterQuotes(data[1])
+			case checkLineKey("cookbook_email", key[0]):
+				config.CookbookEmail = filterQuotes(data[1])
+			case checkLineKey("cookbook_license", key[0]):
+				config.CookbookLicense = filterQuotes(data[1])
+			case checkLineKey("cookbook_path", key[0]):
+				re1 := regexp.MustCompile(`(\n|,|"|\[|\]|^cookbook_path\s)`)
+				cookbookPaths := strings.Fields(re1.ReplaceAllString(scanner.Text(), ``))
+				for !strings.Contains(scanner.Text(), `]`) {
+					for _, item := range strings.Fields(re1.ReplaceAllString(scanner.Text(), ``)) {
+						cookbookPaths = append(cookbookPaths, item)
+					}
+					scanner.Scan()
+				}
+				config.CookbookPath = cookbookPaths
+			case checkLineKey("data_bag_encrypt_version", key[0]):
+				config.DataBagEncryptVersion, _ = strconv.ParseInt(filterQuotes(data[1]), 0, 0)
+			case checkLineKey("local_mode", key[0]):
+				config.LocalMode, _ = strconv.ParseBool(filterQuotes(data[1]))
+			case checkLineKey("node_name", key[0]):
+				config.NodeName = filterQuotes(data[1])
+			case checkLineKey("no_proxy", key[0]):
+				config.NoProxy = regexp.MustCompile(`,\s+`).Split(filterQuotes(data[1]), -1)
+			case checkLineKey("syntax_check_cache_path", key[0]):
+				config.SyntaxCheckCachePath = filterQuotes(data[1])
+			case checkLineKey("validation_client_name", key[0]):
+				config.ValidationClientName = filterQuotes(data[1])
+			case checkLineKey("validation_key", key[0]):
+				config.ValidationKey = filterQuotes(data[1])
+			case checkLineKey("versioned_cookbooks", key[0]):
+				config.VersionedCookbooks, _ = strconv.ParseBool(filterQuotes(data[1]))
 			}
 		}
 	}
-
 	return config, nil
+}
+
+// given a string to compare against and an input string, checkLineKey will
+// return true if the strings are equal
+func checkLineKey(k string, s string) bool {
+
+	if k == s {
+		return true
+	} else {
+		return false
+	}
 }
 
 // Given a string with multiple consecutive spaces, splitWhitespace returns a
