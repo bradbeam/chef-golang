@@ -13,7 +13,7 @@ func TestParseConfig(t *testing.T) {
 
 func TestKeyFromString(t *testing.T) {
 	config := testConfig()
-	_, err := KeyFromString([]byte(config.KeyString))
+	_, err := keyFromString([]byte(config.KeyString))
 	if err != nil {
 		t.Error(err)
 	}
@@ -21,7 +21,7 @@ func TestKeyFromString(t *testing.T) {
 
 func TestKeyFromFile(t *testing.T) {
 	config := testConfig()
-	_, err := KeyFromFile(config.KeyPath)
+	_, err := keyFromFile(config.KeyPath)
 	if err != nil {
 		t.Error(err)
 	}

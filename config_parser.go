@@ -89,7 +89,7 @@ func ParseConfig(configfile ...string) (*KnifeConfig, error) {
 			case checkLineKey("chef_zero[:port]", key[0]):
 				config.ChefZeroPort = filterQuotes(data[1])
 			case checkLineKey("client_key", key[0]):
-				key, err := KeyFromFile(filterQuotes(data[1]))
+				key, err := keyFromFile(filterQuotes(data[1]))
 				if err != nil {
 					return nil, err
 				}
@@ -158,17 +158,17 @@ func filterQuotes(s string) string {
 	return re2.ReplaceAllString(re1.ReplaceAllString(s, ``), ``)
 }
 
-// KeyFromFile reads an RSA private key given a filepath
-func KeyFromFile(filename string) (*rsa.PrivateKey, error) {
+// keyFromFile reads an RSA private key given a filepath
+func keyFromFile(filename string) (*rsa.PrivateKey, error) {
 	content, err := ioutil.ReadFile(filename)
 	if err != nil {
 		return nil, err
 	}
-	return KeyFromString(content)
+	return keyFromString(content)
 }
 
-// KeyFromString parses an RSA private key from a string
-func KeyFromString(key []byte) (*rsa.PrivateKey, error) {
+// keyFromString parses an RSA private key from a string
+func keyFromString(key []byte) (*rsa.PrivateKey, error) {
 	block, _ := pem.Decode(key)
 	if block == nil {
 		return nil, fmt.Errorf("block size invalid for '%s'", string(key))

@@ -80,9 +80,9 @@ func ConnectCredentials(host, port, version, userid, key string) (*Chef, error) 
 	var err error
 
 	if strings.Contains(key, "-----BEGIN RSA PRIVATE KEY-----") {
-		rsaKey, err = KeyFromString([]byte(key))
+		rsaKey, err = keyFromString([]byte(key))
 	} else {
-		rsaKey, err = KeyFromFile(key)
+		rsaKey, err = keyFromFile(key)
 	}
 	if err != nil {
 		return nil, err
@@ -107,9 +107,9 @@ func ConnectUrl(chefServerUrl, version, userid, key string) (*Chef, error) {
 	var err error
 
 	if strings.Contains(key, "-----BEGIN RSA PRIVATE KEY-----") {
-		rsaKey, err = KeyFromString([]byte(key))
+		rsaKey, err = keyFromString([]byte(key))
 	} else {
-		rsaKey, err = KeyFromFile(key)
+		rsaKey, err = keyFromFile(key)
 	}
 	if err != nil {
 		return nil, err
@@ -409,4 +409,3 @@ func responseBody(resp *http.Response) ([]byte, error) {
 
 	return body, nil
 }
-
