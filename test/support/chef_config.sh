@@ -12,11 +12,11 @@ basedir=$(pwd -L)
 # Use "pwd -P" for the path without links. man bash for more info.
 popd > /dev/null
 
-if [ -f ~/.chef/knife.rb ] ; then
-    echo "looks like you go a knife.rb installed. exiting"
-    exit 0
-else 
-    echo "no local knife config using our stub"
-    mkdir -p ~/.chef
-    cp $basedir/knife.rb ~/.chef/
-fi
+#if [ -f ~/.chef/knife.rb ] ; then
+#    echo "looks like you go a knife.rb installed. exiting"
+#    exit 0
+##else 
+#    echo "no local knife config using our stub"
+    mkdir -p ../../.chef
+    cp $basedir/knife.rb $basedir/../../.chef/
+#fi
