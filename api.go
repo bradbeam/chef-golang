@@ -28,23 +28,45 @@ import (
 // server connection
 type Chef struct {
 	Host        string
+	// client.rb chef_server_url
+	// knife.rb  chef_server_url
 	Url         string
 	Port        string
 	Version     string
+	// client.rb client_key
+	// knife.rb  client_key
 	Key         *rsa.PrivateKey
+	// client.rb node_name
+	// knife.rb  node_name
 	UserId      string
+	// client.rb ssl_verify_mode
+	// knife.rb  n/a
 	SSLNoVerify bool
 }
 
 // Connect looks for knife/chef configuration files and gather connection info
 // automagically
-func Connect() (*Chef, error) {
+func ConnectFile(filename string) (*Chef, error) {
 	knifeFiles := []string{}
+
+	if filename != "" {
+		knifeFiles = append(knifeFiles, filename)
+	}
+
+	// Follow knife way of identifying knife.rb
+	// Check current directory for a .chef directory
+	knifeFiles = append(knifeFiles, ".chef/knife.rb")
+
+	// Check ~/.chef
 	homedir := os.Getenv("HOME")
 	if homedir != "" {
 		knifeFiles = append(knifeFiles, filepath.Join(homedir, ".chef/knife.rb"))
 	}
+
+	// Check client.rb
 	knifeFiles = append(knifeFiles, "/etc/chef/client.rb")
+
+	// Fall back on included test/support/knife.rb
 	knifeFiles = append(knifeFiles, "test/support/knife.rb")
 	var knifeFile string
 	for _, each := range knifeFiles {

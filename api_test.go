@@ -26,7 +26,7 @@ func init() {
 }
 
 func testConnectionWrapper(t *testing.T) *Chef {
-	chef, err := Connect()
+	chef, err := ConnectFile("")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -282,11 +282,18 @@ func TestPost(t *testing.T) {
 	}
 }
 
-func TestConnect(t *testing.T) {
-	if _, err := Connect(); err != nil {
+func TestConnectNoFile(t *testing.T) {
+	if _, err := ConnectFile(""); err != nil {
 		t.Error(err)
 	}
 }
+
+func TestConnectFile(t *testing.T) {
+	if _, err := ConnectFile("test/support/knife.rb"); err != nil {
+		t.Error(err)
+	}
+}
+
 
 func TestGenerateRequestAuthorization(t *testing.T) {
 	chef := testConnectionWrapper(t)
